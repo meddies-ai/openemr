@@ -613,84 +613,111 @@ class OpenEMRWebSession:
             print(f"        ✗ Vitals error: {e}")
             return False
 
-    # ==================== LAB RESULTS ====================
+    # ==================== LAB RESULTS (via Direct DB for FHIR) ====================
     
-    def add_lab_results(self, pid, encounter_id, lab_data):
+    def add_lab_results(self, pid, encounter_id, lab_data, db_host="localhost", db_port=3306):
         """
-        Add lab results to an encounter using the observation form.
+        Add lab results to an encounter using direct database insert.
+        This creates procedure_order, procedure_report, and procedure_result records
+        which OpenEMR's FHIR API exposes as Observations.
         
         Args:
             pid: Patient ID
             encounter_id: Encounter ID
             lab_data: list of dicts with lab values:
-                - code: LOINC code (e.g., '2345-7' for Glucose)
-                - description: Test name (e.g., 'Glucose, Serum')
-                - value: Result value (e.g., '105')
-                - unit: Unit of measure (e.g., 'mg/dL')
+                - code: LOINC code (e.g., '6690-2' for WBC)
+                - description: Test name (e.g., 'WBC')
+                - value: Result value (e.g., '4.5')
+                - unit: Unit of measure (e.g., 'x10^9/L')
                 - date: Test date (YYYY-MM-DD)
                 - comments: Optional comments
-                - reference_range: Optional reference range (e.g., '70-100')
+            db_host: MariaDB host (default: localhost for Docker)
+            db_port: MariaDB port (default: 3306)
         """
-        self.set_active_patient(pid)
-        self.set_active_encounter(encounter_id)
-        
-        form_url = f"{self.base_url}/interface/forms/observation/new.php"
-        save_url = f"{self.base_url}/interface/forms/observation/save.php?id=0"
-        
-        # Get the form to extract CSRF token
-        try:
-            form_response = self.session.get(form_url, verify=False)
-        except Exception as e:
-            print(f"        ! Error fetching observation form: {e}")
-            return False
-        
-        csrf_match = re.search(r'name=["\']csrf_token_form["\'][^>]*value=["\']([^"\']+)["\']', form_response.text)
-        if not csrf_match:
-            print("        ! Could not get CSRF token for observation form")
-            return False
-        
-        # Build form data as list of tuples for multiple labs
-        form_data = [('csrf_token_form', csrf_match.group(1))]
-        
-        for lab in lab_data:
-            form_data.extend([
-                ('ob_type[]', 'procedure_diagnostic'),
-                ('code_type[]', 'LOINC'),
-                ('table_code[]', ''),
-                ('code[]', lab.get('code', '')),
-                ('description[]', lab.get('description', '')),
-                ('ob_value[]', str(lab.get('value', ''))),
-                ('ob_unit[]', lab.get('unit', '')),
-                ('ob_value_phin[]', ''),
-                ('code_date[]', lab.get('date', '')),
-                ('code_date_end[]', ''),
-                ('comments[]', lab.get('comments', '')),
-                ('reasonCode[]', ''),
-                ('reasonCodeStatus[]', 'completed'),
-                ('reasonCodeText[]', ''),
-            ])
-        
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Origin': self.base_url,
-            'Referer': form_url
-        }
+        if not lab_data:
+            return True
         
         try:
-            response = self.session.post(save_url, data=form_data, headers=headers, verify=False)
-            if response.status_code == 200:
-                if 'closeTab' in response.text or 'saved' in response.text.lower():
-                    lab_names = [l.get('description', 'Unknown')[:20] for l in lab_data[:3]]
-                    print(f"        ✓ Added {len(lab_data)} Lab Result(s): {', '.join(lab_names)}...")
-                    return True
-                else:
-                    print(f"        ? Lab results submitted but response unclear")
-                    return True
-            else:
-                print(f"        ✗ Failed Lab Results: HTTP {response.status_code}")
-                return False
+            import pymysql
+        except ImportError:
+            print("        ! pymysql not installed. Run: pip install pymysql")
+            return False
+        
+        lab_date = lab_data[0].get('date', datetime.now().strftime("%Y-%m-%d"))
+        
+        try:
+            # Connect to OpenEMR database
+            conn = pymysql.connect(
+                host=db_host,
+                port=db_port,
+                user='openemr',
+                password='openemr',
+                database='openemr',
+                charset='utf8mb4'
+            )
+            cursor = conn.cursor()
+            
+            # 1. Create procedure_order
+            cursor.execute("""
+                INSERT INTO procedure_order 
+                (uuid, patient_id, encounter_id, date_ordered, order_status, 
+                 order_priority, provider_id, lab_id, clinical_hx)
+                VALUES (UNHEX(REPLACE(UUID(),'-','')), %s, %s, %s, 'complete', 
+                        'normal', 1, 0, 'Lab Panel Import')
+            """, (pid, encounter_id, lab_date))
+            order_id = cursor.lastrowid
+            
+            # 2. Create procedure_order_code
+            cursor.execute("""
+                INSERT INTO procedure_order_code 
+                (procedure_order_id, procedure_order_seq, procedure_code, 
+                 procedure_name, procedure_type)
+                VALUES (%s, 1, 'LAB', 'Laboratory Panel', 'laboratory_test')
+            """, (order_id,))
+            
+            # 3. Create procedure_report
+            cursor.execute("""
+                INSERT INTO procedure_report 
+                (uuid, procedure_order_id, procedure_order_seq, date_report, 
+                 date_collected, report_status, review_status)
+                VALUES (UNHEX(REPLACE(UUID(),'-','')), %s, 1, %s, %s, 'final', 'reviewed')
+            """, (order_id, lab_date, lab_date))
+            report_id = cursor.lastrowid
+            
+            # 4. Create procedure_result for each lab
+            for lab in lab_data:
+                cursor.execute("""
+                    INSERT INTO procedure_result 
+                    (uuid, procedure_report_id, result_code, result_text, `date`,
+                     result, units, `range`, abnormal, comments, result_status)
+                    VALUES (UNHEX(REPLACE(UUID(),'-','')), %s, %s, %s, %s, 
+                            %s, %s, %s, %s, %s, 'final')
+                """, (
+                    report_id,
+                    lab.get('code', ''),
+                    lab.get('description', ''),
+                    lab_date,
+                    str(lab.get('value', '')),
+                    lab.get('unit', ''),
+                    lab.get('reference_range', ''),
+                    lab.get('abnormal', ''),
+                    lab.get('comments', '')
+                ))
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            lab_names = [l.get('description', 'Unknown')[:15] for l in lab_data[:3]]
+            suffix = "..." if len(lab_data) > 3 else ""
+            print(f"        ✓ Added {len(lab_data)} Lab(s) [Order #{order_id}]: {', '.join(lab_names)}{suffix}")
+            return True
+            
+        except pymysql.Error as e:
+            print(f"        ✗ Database error: {e}")
+            return False
         except Exception as e:
-            print(f"        ✗ Lab Results error: {e}")
+            print(f"        ✗ Lab error: {e}")
             return False
 
     # ==================== MEDICAL/SOCIAL HISTORY ====================

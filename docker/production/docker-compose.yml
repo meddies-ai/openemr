@@ -7,6 +7,8 @@ services:
     restart: always
     image: mariadb:11.8
     command: ['mariadbd','--character-set-server=utf8mb4']
+    ports:
+    - 3306:3306
     volumes:
     - databasevolume:/var/lib/mysql
     environment:
