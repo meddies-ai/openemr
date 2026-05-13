@@ -1,0 +1,156 @@
+{
+  "resourceType": "Bundle",
+  "id": "meddies-test-bundle-03-ckd-dose-change",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:patient-3471b",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "meddies-test-3471b",
+        "identifier": [
+          {"system": "http://meddies.app/test-id", "value": "3471b"},
+          {"system": "http://bhyt.gov.vn/maso", "value": "HC4-79-1-12-3471b"}
+        ],
+        "active": true,
+        "name": [{"family": "Trần", "given": ["Văn", "Bình"]}],
+        "gender": "male",
+        "birthDate": "1958-11-22"
+      },
+      "request": {"method": "POST", "url": "Patient"}
+    },
+    {
+      "fullUrl": "urn:uuid:encounter-3471b-2026-05-11",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "in-progress",
+        "class": {"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "AMB"},
+        "subject": {"reference": "urn:uuid:patient-3471b"},
+        "period": {"start": "2026-05-11T11:00:00+07:00"},
+        "reasonCode": [{"text": "T2DM follow-up with declining renal function"}]
+      },
+      "request": {"method": "POST", "url": "Encounter"}
+    },
+    {
+      "fullUrl": "urn:uuid:condition-3471b-dm",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10", "code": "E11.22", "display": "Type 2 diabetes mellitus with diabetic chronic kidney disease"}]},
+        "subject": {"reference": "urn:uuid:patient-3471b"},
+        "onsetDateTime": "2018-06-15"
+      },
+      "request": {"method": "POST", "url": "Condition"}
+    },
+    {
+      "fullUrl": "urn:uuid:condition-3471b-ckd",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10", "code": "N18.3", "display": "Chronic kidney disease, stage 3"}]},
+        "subject": {"reference": "urn:uuid:patient-3471b"},
+        "onsetDateTime": "2024-09-10"
+      },
+      "request": {"method": "POST", "url": "Condition"}
+    },
+    {
+      "fullUrl": "urn:uuid:medreq-3471b-metformin",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "860975", "display": "Metformin hydrochloride 1000 MG"}]},
+        "subject": {"reference": "urn:uuid:patient-3471b"},
+        "authoredOn": "2024-08-01",
+        "dosageInstruction": [{
+          "text": "Metformin 1g twice daily with meals",
+          "timing": {
+            "repeat": {"frequency": 2, "period": 1, "periodUnit": "d"},
+            "code": {"text": "BID"}
+          },
+          "doseAndRate": [{"doseQuantity": {"value": 1000, "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}]
+        }]
+      },
+      "request": {"method": "POST", "url": "MedicationRequest"}
+    },
+    {
+      "fullUrl": "urn:uuid:medreq-3471b-lisinopril",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "314076", "display": "Lisinopril 10 MG"}]},
+        "subject": {"reference": "urn:uuid:patient-3471b"},
+        "authoredOn": "2020-03-12",
+        "dosageInstruction": [{
+          "text": "Lisinopril 10mg once daily",
+          "timing": {
+            "repeat": {"frequency": 1, "period": 1, "periodUnit": "d"},
+            "code": {"text": "QD"}
+          },
+          "doseAndRate": [{"doseQuantity": {"value": 10, "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}]
+        }]
+      },
+      "request": {"method": "POST", "url": "MedicationRequest"}
+    },
+    {
+      "fullUrl": "urn:uuid:medreq-3471b-atorva",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "617312", "display": "Atorvastatin 40 MG"}]},
+        "subject": {"reference": "urn:uuid:patient-3471b"},
+        "authoredOn": "2022-09-15",
+        "dosageInstruction": [{
+          "text": "Atorvastatin 40mg once daily",
+          "timing": {
+            "repeat": {"frequency": 1, "period": 1, "periodUnit": "d", "when": ["HS"]},
+            "code": {"text": "QHS"}
+          },
+          "doseAndRate": [{"doseQuantity": {"value": 40, "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}]
+        }]
+      },
+      "request": {"method": "POST", "url": "MedicationRequest"}
+    },
+    {
+      "fullUrl": "urn:uuid:obs-3471b-egfr-current",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "62238-1", "display": "Glomerular filtration rate"}]},
+        "subject": {"reference": "urn:uuid:patient-3471b"},
+        "effectiveDateTime": "2026-05-10",
+        "valueQuantity": {"value": 32, "unit": "mL/min/1.73m²", "system": "http://unitsofmeasure.org", "code": "mL/min/{1.73_m2}"}
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:obs-3471b-egfr-prior",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "62238-1", "display": "Glomerular filtration rate"}]},
+        "subject": {"reference": "urn:uuid:patient-3471b"},
+        "effectiveDateTime": "2025-11-10",
+        "valueQuantity": {"value": 45, "unit": "mL/min/1.73m²", "system": "http://unitsofmeasure.org", "code": "mL/min/{1.73_m2}"}
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:obs-3471b-hba1c",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c"}]},
+        "subject": {"reference": "urn:uuid:patient-3471b"},
+        "effectiveDateTime": "2026-05-10",
+        "valueQuantity": {"value": 8.4, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%"}
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    }
+  ]
+}

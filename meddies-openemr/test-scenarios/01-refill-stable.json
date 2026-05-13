@@ -1,0 +1,127 @@
+{
+  "resourceType": "Bundle",
+  "id": "meddies-test-bundle-01-refill-stable",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:patient-3471",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "meddies-test-3471",
+        "identifier": [
+          {"system": "http://meddies.app/test-id", "value": "3471"},
+          {"system": "http://bhyt.gov.vn/maso", "value": "HC4-79-1-12-3471"}
+        ],
+        "active": true,
+        "name": [{"family": "Phạm", "given": ["Văn", "An"]}],
+        "gender": "male",
+        "birthDate": "1955-08-12"
+      },
+      "request": {"method": "POST", "url": "Patient"}
+    },
+    {
+      "fullUrl": "urn:uuid:encounter-3471-2026-05-11",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "in-progress",
+        "class": {"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "AMB", "display": "ambulatory"},
+        "subject": {"reference": "urn:uuid:patient-3471"},
+        "period": {"start": "2026-05-11T09:30:00+07:00"},
+        "reasonCode": [{"text": "Routine medication refill"}]
+      },
+      "request": {"method": "POST", "url": "Encounter"}
+    },
+    {
+      "fullUrl": "urn:uuid:condition-3471-htn",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10", "code": "I10", "display": "Essential (primary) hypertension"}]},
+        "subject": {"reference": "urn:uuid:patient-3471"},
+        "onsetDateTime": "2022-04-10"
+      },
+      "request": {"method": "POST", "url": "Condition"}
+    },
+    {
+      "fullUrl": "urn:uuid:condition-3471-cad",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10", "code": "I25.2", "display": "Old myocardial infarction"}]},
+        "subject": {"reference": "urn:uuid:patient-3471"},
+        "onsetDateTime": "2024-02-15"
+      },
+      "request": {"method": "POST", "url": "Condition"}
+    },
+    {
+      "fullUrl": "urn:uuid:medreq-3471-amlo",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "197361", "display": "Amlodipine 10mg oral tablet"}]},
+        "subject": {"reference": "urn:uuid:patient-3471"},
+        "authoredOn": "2024-03-15",
+        "dosageInstruction": [{
+          "text": "Amlodipine 10mg once daily",
+          "timing": {
+            "repeat": {"frequency": 1, "period": 1, "periodUnit": "d"},
+            "code": {"text": "QD"}
+          },
+          "doseAndRate": [{"doseQuantity": {"value": 10, "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}],
+          "route": {"coding": [{"system": "http://snomed.info/sct", "code": "26643006", "display": "Oral"}]}
+        }]
+      },
+      "request": {"method": "POST", "url": "MedicationRequest"}
+    },
+    {
+      "fullUrl": "urn:uuid:medreq-3471-atorva",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "617312", "display": "Atorvastatin 40mg oral tablet"}]},
+        "subject": {"reference": "urn:uuid:patient-3471"},
+        "authoredOn": "2024-02-20",
+        "dosageInstruction": [{
+          "text": "Atorvastatin 40mg once daily at bedtime",
+          "timing": {
+            "repeat": {"frequency": 1, "period": 1, "periodUnit": "d", "when": ["HS"]},
+            "code": {"text": "QHS"}
+          },
+          "doseAndRate": [{"doseQuantity": {"value": 40, "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}]
+        }]
+      },
+      "request": {"method": "POST", "url": "MedicationRequest"}
+    },
+    {
+      "fullUrl": "urn:uuid:obs-3471-bp",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "85354-9", "display": "Blood pressure panel"}]},
+        "subject": {"reference": "urn:uuid:patient-3471"},
+        "effectiveDateTime": "2026-05-11T09:30:00+07:00",
+        "component": [
+          {"code": {"coding": [{"system": "http://loinc.org", "code": "8480-6"}]}, "valueQuantity": {"value": 132, "unit": "mmHg", "system": "http://unitsofmeasure.org", "code": "mm[Hg]"}},
+          {"code": {"coding": [{"system": "http://loinc.org", "code": "8462-4"}]}, "valueQuantity": {"value": 78, "unit": "mmHg", "system": "http://unitsofmeasure.org", "code": "mm[Hg]"}}
+        ]
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:obs-3471-ldl",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "13457-7", "display": "LDL cholesterol"}]},
+        "subject": {"reference": "urn:uuid:patient-3471"},
+        "effectiveDateTime": "2026-04-22",
+        "valueQuantity": {"value": 1.8, "unit": "mmol/L", "system": "http://unitsofmeasure.org", "code": "mmol/L"}
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    }
+  ]
+}

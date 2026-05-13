@@ -1,0 +1,113 @@
+{
+  "resourceType": "Bundle",
+  "id": "meddies-test-bundle-05-ddi-quickcheck",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:patient-3508",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "meddies-test-3508",
+        "identifier": [
+          {"system": "http://meddies.app/test-id", "value": "3508"},
+          {"system": "http://bhyt.gov.vn/maso", "value": "HC4-79-1-12-3508"}
+        ],
+        "active": true,
+        "name": [{"family": "Vũ", "given": ["Thị", "Lan"]}],
+        "gender": "female",
+        "birthDate": "1953-12-10"
+      },
+      "request": {"method": "POST", "url": "Patient"}
+    },
+    {
+      "fullUrl": "urn:uuid:encounter-3508",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "in-progress",
+        "class": {"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "AMB"},
+        "subject": {"reference": "urn:uuid:patient-3508"},
+        "period": {"start": "2026-05-11T10:15:00+07:00"},
+        "reasonCode": [{"text": "Bronchitis evaluation, antibiotic consideration"}]
+      },
+      "request": {"method": "POST", "url": "Encounter"}
+    },
+    {
+      "fullUrl": "urn:uuid:condition-3508-afib",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10", "code": "I48.0", "display": "Paroxysmal atrial fibrillation"}]},
+        "subject": {"reference": "urn:uuid:patient-3508"},
+        "onsetDateTime": "2021-07-20"
+      },
+      "request": {"method": "POST", "url": "Condition"}
+    },
+    {
+      "fullUrl": "urn:uuid:medreq-3508-amio",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "203400", "display": "Amiodarone 200mg"}]},
+        "subject": {"reference": "urn:uuid:patient-3508"},
+        "authoredOn": "2021-08-01",
+        "dosageInstruction": [{
+          "text": "Amiodarone 200mg once daily",
+          "timing": {
+            "repeat": {"frequency": 1, "period": 1, "periodUnit": "d"},
+            "code": {"text": "QD"}
+          },
+          "doseAndRate": [{"doseQuantity": {"value": 200, "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}]
+        }]
+      },
+      "request": {"method": "POST", "url": "MedicationRequest"}
+    },
+    {
+      "fullUrl": "urn:uuid:medreq-3508-warfarin",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {"coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "855332", "display": "Warfarin Sodium 5 MG"}]},
+        "subject": {"reference": "urn:uuid:patient-3508"},
+        "authoredOn": "2021-08-01",
+        "dosageInstruction": [{
+          "text": "Warfarin 5mg once daily, INR-titrated",
+          "timing": {
+            "repeat": {"frequency": 1, "period": 1, "periodUnit": "d"},
+            "code": {"text": "QD"}
+          },
+          "doseAndRate": [{"doseQuantity": {"value": 5, "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg"}}]
+        }]
+      },
+      "request": {"method": "POST", "url": "MedicationRequest"}
+    },
+    {
+      "fullUrl": "urn:uuid:obs-3508-inr",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "6301-6", "display": "INR"}]},
+        "subject": {"reference": "urn:uuid:patient-3508"},
+        "effectiveDateTime": "2026-05-09",
+        "valueQuantity": {"value": 2.4, "unit": "{ratio}", "system": "http://unitsofmeasure.org", "code": "{ratio}"}
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:obs-3508-ecg-qtc",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "exam"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "8634-8", "display": "QT corrected interval"}]},
+        "subject": {"reference": "urn:uuid:patient-3508"},
+        "effectiveDateTime": "2024-08-12",
+        "valueQuantity": {"value": 458, "unit": "ms", "system": "http://unitsofmeasure.org", "code": "ms"},
+        "note": [{"text": "Last available ECG; >18 months old"}]
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    }
+  ]
+}

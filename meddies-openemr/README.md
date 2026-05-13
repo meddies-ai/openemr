@@ -1,6 +1,11 @@
-# OpenEMR Patient Import Script
+# OpenEMR Demo Data — Meddies
 
-Populates OpenEMR with realistic Vietnamese patient records including demographics, medical history, medications, allergies, encounters, vitals, and lab results.
+Two things live here:
+
+1. **`import_and_enrich.py` + `patients.jsonl`** — 20 realistic Vietnamese patients (demographics, history, meds, allergies, encounters, vitals, labs).
+2. **`test-scenarios/`** — 5 D10a stress-test patient bundles (FHIR R4 transaction Bundles), one per agent-eval scenario. Loaded by `meddies-app/scripts/demo-fhir.sh up`.
+
+The fork also carries the `MedicationRequest.dosageInstruction.timing.repeat` patch (`src/Services/FHIR/FhirMedicationRequestService.php`) so structured frequency/period/periodUnit is available to clinical decision support.
 
 ## Quick Start
 
@@ -76,6 +81,28 @@ Each patient includes:
 Add a new line to `patients.jsonl`:
 ```json
 {"fname": "Name", "lname": "Surname", "DOB": "1990-01-01", "sex": "Male", "problems": [...], "medications": [...], "encounters": [...]}
+```
+
+## Test scenarios (`test-scenarios/`)
+
+5 FHIR R4 `transaction` Bundles. Each one mirrors a D10a stress-test scenario; they ship with full `MedicationRequest.dosageInstruction.timing.repeat` structure (frequency/period/periodUnit) since this fork carries the populate-timing patch.
+
+| File | Scenario | Patient | Key clinical context |
+|---|---|---|---|
+| `01-refill-stable.json` | Routine refill | Phạm Văn An, 70M | Post-MI, stable amlodipine + atorvastatin 2 years; refill request |
+| `02-new-med-initiation.json` | New medication | Nguyễn Thị Hoa, 58F | New T2DM dx, HbA1c 7.8, eGFR 88, considering metformin start |
+| `03-ckd-dose-change.json` | CKD dose change | Trần Văn Bình, 67M | eGFR declining 45 → 32 over 6 months, on metformin + lisinopril |
+| `04-pediatric-dosing.json` | Pediatric dosing | Lê Minh Tuấn, 4yr 18kg | Otitis media, no known allergies, weight parent-reported |
+| `05-ddi-quickcheck.json` | DDI quick-check | Vũ Thị Lan, 72F | Chronic amiodarone + warfarin, query about adding azithromycin |
+
+**Patient ID convention:** all scenario patients use the `meddies-test-` prefix to avoid collision with the 20 base patients. Example: `meddies-test-3471`.
+
+**Loading:** automated by `meddies-app/scripts/demo-fhir.sh up`. Each bundle POSTs as a single FHIR transaction to `/apis/default/fhir`. Manual load:
+```bash
+curl -k -X POST https://localhost/apis/default/fhir \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/fhir+json" \
+  --data @test-scenarios/01-refill-stable.json
 ```
 
 ## How It Works

@@ -1,0 +1,84 @@
+{
+  "resourceType": "Bundle",
+  "id": "meddies-test-bundle-04-pediatric-dosing",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:patient-ped-001",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "meddies-test-ped-001",
+        "identifier": [
+          {"system": "http://meddies.app/test-id", "value": "ped-001"},
+          {"system": "http://bhyt.gov.vn/maso", "value": "HC4-79-1-12-ped001"}
+        ],
+        "active": true,
+        "name": [{"family": "Lê", "given": ["Minh", "Tuấn"]}],
+        "gender": "male",
+        "birthDate": "2022-04-30"
+      },
+      "request": {"method": "POST", "url": "Patient"}
+    },
+    {
+      "fullUrl": "urn:uuid:encounter-ped-001",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "in-progress",
+        "class": {"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "AMB"},
+        "subject": {"reference": "urn:uuid:patient-ped-001"},
+        "period": {"start": "2026-05-11T08:30:00+07:00"},
+        "reasonCode": [{"text": "Ear pain, suspected otitis media"}]
+      },
+      "request": {"method": "POST", "url": "Encounter"}
+    },
+    {
+      "fullUrl": "urn:uuid:condition-ped-om",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]},
+        "code": {"coding": [{"system": "http://hl7.org/fhir/sid/icd-10", "code": "H66.0", "display": "Acute suppurative otitis media"}]},
+        "subject": {"reference": "urn:uuid:patient-ped-001"},
+        "onsetDateTime": "2026-05-10"
+      },
+      "request": {"method": "POST", "url": "Condition"}
+    },
+    {
+      "fullUrl": "urn:uuid:obs-ped-weight",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "preliminary",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "29463-7", "display": "Body weight"}]},
+        "subject": {"reference": "urn:uuid:patient-ped-001"},
+        "effectiveDateTime": "2026-05-11T08:30:00+07:00",
+        "valueQuantity": {"value": 18, "unit": "kg", "system": "http://unitsofmeasure.org", "code": "kg"},
+        "note": [{"text": "Parent-reported, not formally weighed at this visit"}]
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:obs-ped-temp",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "8310-5", "display": "Body temperature"}]},
+        "subject": {"reference": "urn:uuid:patient-ped-001"},
+        "effectiveDateTime": "2026-05-11T08:30:00+07:00",
+        "valueQuantity": {"value": 38.4, "unit": "°C", "system": "http://unitsofmeasure.org", "code": "Cel"}
+      },
+      "request": {"method": "POST", "url": "Observation"}
+    },
+    {
+      "fullUrl": "urn:uuid:allergy-ped-001",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "clinicalStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "code": "active"}]},
+        "verificationStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "code": "unconfirmed"}]},
+        "code": {"text": "No known drug allergies"},
+        "patient": {"reference": "urn:uuid:patient-ped-001"}
+      },
+      "request": {"method": "POST", "url": "AllergyIntolerance"}
+    }
+  ]
+}
