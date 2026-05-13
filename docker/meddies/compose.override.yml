@@ -1,0 +1,14 @@
+# Meddies compose override — swaps in the patched OpenEMR image.
+#
+# Used by meddies-app's `demo-fhir.sh`:
+#   docker compose \
+#     -f docker/production/docker-compose.yml \
+#     -f docker/meddies/compose.override.yml \
+#     up -d
+#
+# The patched image is built from docker/meddies/Dockerfile and adds the
+# timing.repeat population to MedicationRequest.dosageInstruction.
+
+services:
+  openemr:
+    image: meddies/openemr:7.0.3-patched
